@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Dice Roller PWA</title>
+  <style>
+    body { text-align: center; font-family: sans-serif; margin-top: 100px; }
+    #dice { font-size: 7rem; margin: 24px;}
+    button { font-size: 2rem; padding: 10px 30px; border-radius: 10px;}
+  </style>
+</head>
+<body>
+  <h1>🎲 Dice Roller</h1>
+  <div id="dice" aria-live="polite">1</div>
+  <button id="rollBtn">Roll</button>
+  <script>
+    function rollDice() {
+      document.getElementById('dice').textContent = Math.floor(Math.random() * 6) + 1;
+    }
+    document.getElementById('rollBtn').addEventListener('click', rollDice);
+
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
