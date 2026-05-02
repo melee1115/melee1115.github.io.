@@ -18,15 +18,19 @@
   <div id="dice" aria-live="polite">1</div>
   <button id="rollBtn">Roll</button>
   <script>
+    // Load last roll on page load
+    const diceDiv = document.getElementById('dice');
+    const lastRoll = localStorage.getItem('lastDiceRoll');
+    if (lastRoll !== null) {
+      diceDiv.textContent = lastRoll;
+    }
+
     function rollDice() {
-      document.getElementById('dice').textContent = Math.floor(Math.random() * 6) + 1;
+      const roll = Math.floor(Math.random() * 6) + 1;
+      diceDiv.textContent = roll;
+      localStorage.setItem('lastDiceRoll', roll);
     }
     document.getElementById('rollBtn').addEventListener('click', rollDice);
 
-    // Register service worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
-</body>
-</html>
+    // Register service worker*
+
