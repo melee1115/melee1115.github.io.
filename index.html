@@ -20,17 +20,50 @@
     body {
       text-align: center;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      margin-top: 50px;
       background-color: #f5f5f5;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      padding: 20px;
     }
     h1 {
+      margin-top: 20px;
       margin-bottom: 20px;
       font-size: 2rem;
+    }
+    #history {
+      background-color: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+    #history h2 {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    #rollsList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      min-height: 30px;
+    }
+    .roll-item {
+      background-color: #007AFF;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .no-rolls {
+      color: #999;
+      font-style: italic;
     }
     #dice {
       font-size: 7rem;
@@ -77,26 +110,67 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    #clearBtn {
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      background-color: #ff3b30;
+      margin-top: 10px;
+    }
+    #clearBtn:hover {
+      background-color: #d32f2a;
+    }
   </style>
 </head>
 <body>
   <h1>🎲 Dice Roller</h1>
+  
+  <div id="history">
+    <h2>Roll History</h2>
+    <div id="rollsList" class="no-rolls">No rolls yet</div>
+    <button id="clearBtn">Clear History</button>
+  </div>
+
   <div id="dice" aria-live="polite">1</div>
   <button id="rollBtn">Roll</button>
 
   <script>
     const rollBtn = document.getElementById('rollBtn');
+    const rollsList = document.getElementById('rollsList');
+    const clearBtn = document.getElementById('clearBtn');
+
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem('rollHistory')) || [];
+      return history;
+    }
+
+    function saveHistory(history) {
+      localStorage.setItem('rollHistory', JSON.stringify(history));
+    }
+
+    function displayHistory() {
+      const history = loadHistory();
+      if (history.length === 0) {
+        rollsList.innerHTML = '<span class="no-rolls">No rolls yet</span>';
+      } else {
+        rollsList.innerHTML = history.map(roll => `<span class="roll-item">${roll}</span>`).join('');
+      }
+    }
 
     function rollDice() {
       // Disable button and show loading state
       rollBtn.disabled = true;
       rollBtn.innerHTML = '<span class="spinner"></span>Rolling...';
 
-      // Simulate a small delay for visual effect (you can adjust this)
+      // Simulate a small delay for visual effect
       setTimeout(() => {
         const roll = Math.floor(Math.random() * 6) + 1;
         document.getElementById('dice').textContent = roll;
-        localStorage.setItem('lastDiceRoll', roll);
+
+        // Add to history
+        const history = loadHistory();
+        history.push(roll);
+        saveHistory(history);
+        displayHistory();
 
         // Re-enable button and restore text
         rollBtn.disabled = false;
@@ -104,12 +178,17 @@
       }, 500);
     }
 
-    window.addEventListener('DOMContentLoaded', function() {
-      const lastRoll = localStorage.getItem('lastDiceRoll');
-      if (lastRoll !== null) {
-        document.getElementById('dice').textContent = lastRoll;
+    function clearHistory() {
+      if (confirm('Are you sure you want to clear all roll history?')) {
+        localStorage.setItem('rollHistory', JSON.stringify([]));
+        displayHistory();
       }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      displayHistory();
       rollBtn.addEventListener('click', rollDice);
+      clearBtn.addEventListener('click', clearHistory);
     });
 
     // Register service worker for PWA
